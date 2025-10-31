@@ -1,7 +1,7 @@
 {
     "log_dir": "./nginx_logs",
     "batch_size": 500,
-    "drain_logs_before_api_start": false,
+    "drain_logs_before_api_start": true,
     "schema_creation": true,
     "postgres": {
         "host": "localhost",
