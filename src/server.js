@@ -13,6 +13,7 @@ const start = async (config) => {
     }
 
     if(config.schema_creation){
+        console.log('Checking DB schema...');
         await persistence.schemaCreator.createInitialDBSchema();
     };
 

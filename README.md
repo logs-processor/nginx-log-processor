@@ -1,11 +1,11 @@
-#Nginx Log Parser
+# Nginx Log Parser
 
 A Node.js-based tool for parsing Nginx access logs and storing structured data in a PostgreSQL database.  
 It supports batch processing, configurable startup behavior, and automatic log ingestion from a specified directory.
 
 ---
 
-##Features
+## Features
 
 - **Batched log processing** for efficiency  
 - **PostgreSQL integration** with connection pooling  
@@ -17,7 +17,7 @@ It supports batch processing, configurable startup behavior, and automatic log i
 
 ---
 
-##Requirements
+## Requirements
 
 - **Node.js**
 - **npm**
@@ -25,7 +25,7 @@ It supports batch processing, configurable startup behavior, and automatic log i
 
 ---
 
-##Installation and Launch
+## Installation and Launch
 
 1. Clone the repository
 2. Install dependencies 
@@ -37,33 +37,49 @@ It supports batch processing, configurable startup behavior, and automatic log i
     npm run start
 
 
-##API Endpoints
+## API Endpoints
 
 1. **Health check route (`/health`)** for future proof Dockerisation and readiness/liveness probes:
-    ```bash
-    http://localhost:3000/v1/health
-    
-Example response:
+    ```http://localhost:3000/v1/health```
+
+    Example response:
     ```
     {
         "payload": "ok"
     }
     ```
-2. Cursor based logs fetching endpoint which returns logs sorted by: ip desc and route desc
-To get first page of logs call GET:
-    ```bash
-    http://localhost:3000/v1/logs?batchSize=16
-supported parameters batchSize - size of log entries per row
-response example:
-    ```bash
+2. Cursor based paginated logs fetch endpoint which returns logs sorted by: ip desc and route desc
+To get first page of logs call GET with required parameter **batchSize** to set page size:
+    ``` 
+    http://localhost:3000/v1/logs?batchSize=1
+    ```
+    Response example:
+    ```
     {
         "payload": {
-            "objects": [],
+            "objects": [
+                {
+                    "id": "180802",
+                    "ip": "2001:db8:0:1:0:0:0:e",
+                    "method": "PUT",
+                    "route": "/zzmvqemwij",
+                    "status": 204,
+                    "bytes": 5133,
+                    "timestamp": "2025-10-30T12:10:36.000Z",
+                    "referrer": "https://www.msn.com/",
+                    "user_agent": "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko",
+                    "raw_line": "2001:db8:0:1:0:0:0:e - - [30/Oct/2025:16:10:36 +0200] \"PUT /zzmvqemwij HTTP/1.1\" 204 5133 \"https://www.msn.com/\" \"Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; AS; rv:11.0) like Gecko\""
+                }
+            ],
             "metadata": {
-                "paginationToken": "Mjc3MzYzOTUsMjAwMTpkYjg6MDoxOjA6MDowOmUsL3p6enp0Zw==",
-                "batchSize": 0
+                "paginationToken": "MTgwODAyLDIwMDE6ZGI4OjA6MTowOjA6MDplLC96em12cWVtd2lq",
+                "batchSize": 1
             }
         }
     }
-    
-    To get next page call GET: http://localhost:3000/v1/logs?batchSize=16&paginationToken=Mjc3MzYzOTUsMjAwMTpkYjg6MDoxOjA6MDowOmUsL3p6enp0Zw==
+    ```
+    To get next page of logs call GET with optional parameter **paginationToken** which will be returned in the response 
+    metadata while next page could be fetched:
+    ```
+    http://localhost:3000/v1/logs?batchSize=1&paginationToken=MTgwODAyLDIwMDE6ZGI4OjA6MTowOjA6MDplLC96em12cWVtd2lq
+    ```
