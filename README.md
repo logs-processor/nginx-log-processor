@@ -1,4 +1,4 @@
-# Nginx Log Parser
+# Nginx Log API
 
 A Node.js-based tool for parsing Nginx access logs and storing structured data in a PostgreSQL database.  
 It supports batch processing, configurable startup behavior, and automatic log ingestion from a specified directory.
