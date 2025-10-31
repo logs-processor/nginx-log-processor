@@ -1,0 +1,13 @@
+{
+    "log_dir": "./nginx_logs",
+    "batch_size": 500,
+    "drain_logs_before_api_start": false,
+    "schema_creation": true,
+    "postgres": {
+        "host": "localhost",
+        "user": "postgres",
+        "pass": "root",
+        "name": "nginx_logs",
+        "maxConnections": 20
+    }
+}

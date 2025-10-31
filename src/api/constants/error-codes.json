@@ -1,0 +1,8 @@
+{
+  "get_logs_paginated": {
+    "bad_request": "001",
+    "wrong_cursor_format": "002",
+    "persistence_error": "003",
+    "internal_server_error": "004"
+  }
+}
