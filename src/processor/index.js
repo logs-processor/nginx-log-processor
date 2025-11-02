@@ -128,9 +128,6 @@ async function processAllLogs() {
     }
 }
 
-/**
- * Export function to initialize dependencies.
- */
 module.exports = (db, cfg, pool) => {
     persistence = db;
     dbpool = pool;
