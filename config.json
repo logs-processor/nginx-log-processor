@@ -3,11 +3,18 @@
     "batch_size": 500,
     "drain_logs_before_api_start": true,
     "schema_creation": true,
+
     "postgres": {
         "host": "localhost",
         "user": "postgres",
         "pass": "root",
         "name": "nginx_logs",
         "maxConnections": 20
+    },
+    "logger": {
+        "level": "debug",
+        "log_file_path": "./logs/log.csv",
+        "output_mode": "console",
+        "available_output_modes": "file, console, file_and_console"
     }
 }

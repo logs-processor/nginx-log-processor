@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS logs (
   referrer TEXT,
   user_agent TEXT,
   raw_line TEXT,
+  filename text,
   PRIMARY KEY (ip, id)
 ) PARTITION BY HASH (ip);
 

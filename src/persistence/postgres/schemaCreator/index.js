@@ -2,7 +2,6 @@ const {Pool} = require('pg');
 
 class SchemaCreator {
     constructor(pgpool, config) {
-        this.cfg = config;
         this.runQuery = pgpool.runQuery;
     };
 
@@ -21,6 +20,7 @@ class SchemaCreator {
             referrer TEXT,
             user_agent TEXT,
             raw_line TEXT,
+            filename TEXT,
             PRIMARY KEY (ip, id)
         ) PARTITION BY HASH (ip);
 

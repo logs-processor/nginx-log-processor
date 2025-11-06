@@ -1,6 +1,8 @@
 # Nginx Log API
 **Console logs is left with intense to show how activity is going as it is a test task. Overall this should be converted to winston logger or simmilar**
 
+**In case of scaling write and read DB pools could be separated for best perfomance**
+
 A Node.js-based tool for parsing Nginx access logs and storing structured data in a PostgreSQL database.  
 It supports batch processing, configurable startup behavior, and automatic log ingestion from a specified directory.
 

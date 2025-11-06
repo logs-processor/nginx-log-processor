@@ -1,4 +1,5 @@
 let persistence;
+const logger = require('../../../logger');
 const errors = require('../../constants/error-codes');
 const {
     success,
@@ -8,9 +9,9 @@ const {
 
 const getLogsPaginated = async (req, res) => {
     const {batchSize, paginationToken} = req.query;
-    console.log(`[Logs] Received request to get logs paginaged`);
+    logger.debug(`[Logs] Received request to get logs paginaged`);
     if (!batchSize) {
-        console.log(`[Logs] Bad request. Missing batchSize param.`);
+        logger.error(`[Logs] Bad request. Missing batchSize param.`);
         return badRequest(res, errors.get_logs_paginated.bad_request, 'Bad request. Missing batchSize parameters.');
     }
     let logs;
@@ -24,10 +25,10 @@ const getLogsPaginated = async (req, res) => {
         let ip = cursor[1];
         let route = cursor[2];
         try {
-            console.log(`[Logs] Calling storage to get next: ${batchSize} logs starting from cursor:${paginationToken}`);
+            logger.debug(`[Logs] Calling storage to get next: ${batchSize} logs starting from cursor:${paginationToken}`);
             logs = await persistence.getLogsFromToken([ip, route, id, batchSize]);
         } catch (err) {
-            console.log(`[Logs] Persistence failed to get logs batch of size:${batchSize} starting from:${paginationToken}, Err ${err.message}`);
+            logger.error(`[Logs] Persistence failed to get logs batch of size:${batchSize} starting from:${paginationToken}, Err ${err.message}`);
             return internalError(res, errors.get_logs_paginated.persistence_error, 'Persistence failed to get next logs batch.');
         }
         if (logs.rowCount > 0) {
@@ -47,10 +48,10 @@ const getLogsPaginated = async (req, res) => {
         }
     } else {
         try {
-            console.log(`[Logs] Calling storage to get first logs batch of size: ${batchSize}`);
+            logger.debug(`[Logs] Calling storage to get first logs batch of size: ${batchSize}`);
             logs = await persistence.getLogsFromStart([batchSize]);
         } catch (err) {
-            console.log(`[Logs] Persistence failed to get ${batchSize} logs, Err: ${err.message}`);
+            logger.error(`[Logs] Persistence failed to get ${batchSize} logs, Err: ${err.message}`);
             return internalError(res, errors.get_logs_paginated.persistence_error, `Persistence failed to retrieve first logs batch.`);
         }
         if (logs.rowCount > 0) {

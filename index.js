@@ -1,5 +1,6 @@
 const config = require('./config.json');
 const server = require('./src/server');
+const logger = require('./src/logger');
 
 const { dbhost, dbuser, dbpass, dbname, dbMaxConnections } = process.env;
 
@@ -14,4 +15,4 @@ if (dbhost !== undefined && dbuser !== undefined && dbpass !== undefined && dbna
     }
 }
 
-server.start(config);
+server.start(config, logger);

@@ -1,3 +1,4 @@
+const logger = require('../logger');
 const fs = require('fs/promises');
 const fstream = require('fs');
 const readline = require('readline');
@@ -9,8 +10,8 @@ let config;
 /**
  * Process a single log file line by line and insert logs in batches.
  */
-async function processFile(filePath) {
-    console.log(`Processing: ${filePath} with batch size of: ${config.batch_size}`);
+const processFile = async(filePath) => {
+    logger.debug(`Processing: ${filePath} with batch size of: ${config.batch_size}`)
     const startTime = Date.now();
 
     const stream = fstream.createReadStream(filePath, { encoding: 'utf8' });
@@ -29,13 +30,12 @@ async function processFile(filePath) {
 
         if (batch.length >= config.batch_size) {
             try {
-                await persistence.insertBatch(batch);
-                //await persistence.insertBatchCopy(batch);
+                await persistence.insertBatch(batch, filePath);
                 inserted += batch.length;
             } catch (err) {
                 hasError = true;
                 failedBatches++;
-                console.error(`Error inserting batch (${batch.length} items):`, err.message);
+                logger.error(`Error inserting batch (${batch.length} items), Err ${err.message}`, );
             } finally {
                 batch = [];
             }
@@ -45,12 +45,13 @@ async function processFile(filePath) {
     // Insert any remaining records
     if (batch.length > 0) {
         try {
-            await persistence.insertBatch(batch);
+            await persistence.insertBatch(batch, filePath);
             inserted += batch.length;
         } catch (err) {
             hasError = true;
             failedBatches++;
-            console.error(`Error inserting last batch (${batch.length} items):`, err.message);
+            logger.error(`Error inserting last batch (${batch.length} items), Err: ${err.message}`);
+
         }
     }
 
@@ -58,29 +59,29 @@ async function processFile(filePath) {
     const durationSec = ((endTime - startTime) / 1000).toFixed(2);
 
     if (hasError) {
-        console.log(`Finished with errors: ${filePath}`);
-        console.log(`Inserted: ${inserted.toLocaleString()} logs`);
-        console.log(`Failed batches: ${failedBatches}`);
-        console.log(`Time: ${durationSec}s\n`);
+        logger.error(`Finished with errors: ${filePath}`);
+        logger.error(`Inserted: ${inserted.toLocaleString()} logs`);
+        logger.error(`Failed batches: ${failedBatches}`);
+        logger.error(`Time: ${durationSec}s`);
     } else {
-        console.log(`Finished successfully: ${filePath} (${inserted.toLocaleString()} logs inserted, took ${durationSec}s)\n`);
+        logger.info(`Finished successfully: ${filePath} (${inserted.toLocaleString()} logs inserted, took ${durationSec}s)`);
     }
-}
+};
 
 /**
  * Process all .log files in the configured directory.
  */
-async function processAllLogs() {
+const processAllLogs = async() => {
     const files = (await fs.readdir(config.log_dir))
         .filter(name => name.endsWith('.log'))
         .map(name => path.join(config.log_dir, name));
 
     if (files.length === 0) {
-        console.log('No log files found in directory.');
+        logger.info(`No log files found in directory.`);
         return;
     }
 
-    console.log(`Found ${files.length} log files to process.`);
+    logger.info(`Found ${files.length} log files to process.`);
 
     const failedFiles = [];
     // Fetch already processed files from the database
@@ -88,7 +89,7 @@ async function processAllLogs() {
     try {
         processedFiles = await persistence.getProcessedFiles();
     } catch (err) {
-        console.error(`Failed to fetch processed files, Err: ${err.message}`);
+        logger.error(`Failed to fetch processed files, Err: ${err.message}`);
         processedFiles = [];
     }
 
@@ -102,11 +103,11 @@ async function processAllLogs() {
     const filesToProcess = files.filter(f => !processedFiles.includes(f) && !processedFiles.includes(f));
     
     if (filesToProcess.length === 0) {
-        console.log('All files have already been processed.');
+        logger.info(`All files have already been processed.`);
         return;
     }
 
-    console.log(`Processing ${filesToProcess.length} new log files.`);
+    logger.info(`Processing ${filesToProcess.length} new log files.`);
     await persistence.dropIndexes();
 
     for (const file of filesToProcess) {
@@ -114,18 +115,18 @@ async function processAllLogs() {
             await processFile(file);
             await persistence.trackProcessedFile([file]);
         } catch (err) {
-            console.error(`Failed to process ${file}:`, err.message);
+            logger.error(`Failed to process ${file}: ${err.message}`);
             failedFiles.push(file);
         }
     }
     await persistence.createIndexes();
     if (failedFiles.length > 0) {
-        console.log('Some files failed:');
-        failedFiles.forEach(f => console.log(` - ${f}`));
+        logger.error(`Failed files: ${err.message}`);
+        failedFiles.forEach(f => logger.error((` - ${f}`)));
     } else {
-        console.log('All files processed successfully.');
+        logger.info(`All files processed successfully.`);
     }
-}
+};
 
 module.exports = (db, cfg) => {
     persistence = db;

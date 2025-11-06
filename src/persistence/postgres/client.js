@@ -2,7 +2,7 @@ const { Pool } = require('pg');
 let pool;
 let dbStatus = 'disconnected';
 
-const createPool = async (config) => {
+const createPool = async (config, logger) => {
     pool = new Pool({
         host: config.host,
         user: config.user,
@@ -14,27 +14,27 @@ const createPool = async (config) => {
     });
 
     pool.on('error', function errorFunc(err){
-        console.log(`[database] error occurred, code: ${err.code}, severity: ${err.severity}`);
+        logger.error(`[database] error occurred, code: ${err.code}, severity: ${err.severity}`);
     });
     pool.on('connect', function connectFunc(client){
         client.on('error', function errorFunc(err){
-            console.log(`[database] error occurred in connection to database: ${err.message}`);
+            logger.error(`[database] error occurred in connection to database: ${err.message}`);
             client.removeListener("error", errorFunc);
             dbStatus = 'disconnected';
         });
-        console.log(`[database] connected to PostgreSQL server`);
+        logger.info(`[database] connected to PostgreSQL server`);
         dbStatus = 'connected';
     });
     try {
         await pool.connect();
     } catch (err) {
-        console.log(`Could not connect to PostgreSQL, because: ${err.message}`);
+        logger.error(`Could not connect to PostgreSQL, because: ${err.message}`);
         return new Error(`Could not connect to PostgreSQL, because: ${err.message}`);
     }
 };
 
-module.exports = async (config) => {
-    let err = await createPool(config);
+module.exports = async (config, logger) => {
+    let err = await createPool(config, logger);
     if (err instanceof Error) {
         return err;
     }

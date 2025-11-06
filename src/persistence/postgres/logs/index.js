@@ -10,10 +10,9 @@ class Logs {
     constructor(pgpool, config) {
         this.cfg = config;
         this.runQuery = pgpool.runQuery;
-        this.pool = pgpool.pool;   //direct access for COPY
     };
 
-    insertBatch = async (batch) => {
+    insertBatch = async (batch, filename) => {
         if (batch.length === 0) {
             return;
         }
@@ -26,14 +25,15 @@ class Logs {
         '${entity.timestamp}',
         '${entity.referrer}',
         '${entity.user_agent}',
-        '${entity.raw_line}'
+        '${entity.raw_line}',
+        '${filename}'
     )`).join(',\n');
-        const query = ` INSERT INTO logs  (ip, method, route, status, bytes, timestamp, referrer, user_agent, raw_line)
+        const query = ` INSERT INTO logs  (ip, method, route, status, bytes, timestamp, referrer, user_agent, raw_line, filename)
                         VALUES ${values}; `;
         return await this.runQuery(query);
     };
 
-    dropIndexes = async (data) => {
+    dropIndexes = async () => {
         return await this.runQuery(`
         BEGIN;
         DROP INDEX IF EXISTS idx_logs_ip_route;
@@ -48,7 +48,7 @@ class Logs {
         COMMIT;`)
     };
 
-    createIndexes = async (data) => {
+    createIndexes = async () => {
         return await this.runQuery(`
         BEGIN;
         CREATE INDEX IF NOT EXISTS idx_logs_ip_route ON logs (ip, route, timestamp);

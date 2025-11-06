@@ -1,8 +1,8 @@
 const Logs = require('./logs');
 const SchemaCreator = require('./schemaCreator');
 
-module.exports = async (config) => {
-    const pgpool = await require('./client')(config);
+module.exports = async (config, logger) => {
+    const pgpool = await require('./client')(config, logger);
     if (pgpool instanceof Error) {
         return pgpool;
     }
