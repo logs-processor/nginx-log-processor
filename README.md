@@ -33,6 +33,7 @@ It supports batch processing, configurable startup behavior, and automatic log i
     ```bash
     npm install
 3. Review and set configuration located in **config.json** (by default DB schema will be created auto on 1st run)
+4. Set processed **batch_size** at a time in **config.json**, depending on the lines amount, recommended not less than 500.
 5. Launch!
     ```bash
     npm run start
