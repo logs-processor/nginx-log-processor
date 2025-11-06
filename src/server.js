@@ -17,7 +17,7 @@ const start = async (config) => {
         await persistence.schemaCreator.createInitialDBSchema();
     };
 
-    const ingestor = processor(persistence.logs, config, persistence.pgpool);
+    const ingestor = processor(persistence.logs, config);
 
     if (config.drain_logs_before_api_start) {
         console.log('Starting log ingestion...');

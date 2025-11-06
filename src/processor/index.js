@@ -3,7 +3,6 @@ const fstream = require('fs');
 const readline = require('readline');
 const path = require('path');
 const { parseLogLine } = require('../parser');
-let dbpool;
 let persistence;
 let config;
 
@@ -128,9 +127,8 @@ async function processAllLogs() {
     }
 }
 
-module.exports = (db, cfg, pool) => {
+module.exports = (db, cfg) => {
     persistence = db;
-    dbpool = pool;
     config = cfg;
     return {
         processAllLogs
